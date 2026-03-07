@@ -1,34 +1,34 @@
 package camus
 
 import "base:runtime"
-import "core:fmt"
 import "core:log"
 import sdl "vendor:sdl3"
+import "vector2"
 
 // show
 debug := false
 
 is_running := false
 
+// callbacks
 InitCallback :: proc()
 init: InitCallback = proc() {}
 TickCallback :: proc()
 tick: TickCallback = proc() {}
 
+// settings
+background_color: Color
+window_size: vector2.Vector2Int = vector2.Vector2Int{640, 480}
+
+// generated variables
 window: ^sdl.Window
 renderer: ^sdl.Renderer
-background_color: Color
 
 Color :: struct {
 	r: u8,
 	g: u8,
-	b: u8, 
+	b: u8,
 	a: u8,
-}
-
-Vector2 :: struct {
-	x: f32,
-	y: f32,
 }
 
 run :: proc() {
@@ -42,7 +42,7 @@ run :: proc() {
 	if !sdl_init {
 		log.panic(sdl.GetError())
 	}
-	window = sdl.CreateWindow("Camus", 640, 480, sdl.WINDOW_OPENGL)
+	window = sdl.CreateWindow("Camus", window_size.x, window_size.y, sdl.WINDOW_OPENGL)
 	if window == nil {
 		log.panic(sdl.GetError())
 	}
@@ -75,7 +75,7 @@ run :: proc() {
 }
 
 
-draw_line :: proc(color: Color, start: Vector2, end: Vector2){
+draw_line :: proc(color: Color, start: vector2.Vector2, end: vector2.Vector2) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
 	sdl.RenderLine(renderer, start.x, start.y, end.x, end.y)
 }
