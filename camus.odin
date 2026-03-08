@@ -4,6 +4,7 @@ import "base:runtime"
 import "core:log"
 import sdl "vendor:sdl3"
 import "vector2"
+import "core:time"
 
 // show
 debug := false
@@ -13,8 +14,10 @@ is_running := false
 // callbacks
 InitCallback :: proc()
 init: InitCallback = proc() {}
-TickCallback :: proc()
-tick: TickCallback = proc() {}
+TickCallback :: proc(delta_time: f64)
+tick: TickCallback = proc(delta_time: f64) {}
+FixedTickCallback :: proc()
+fixed_tick: FixedTickCallback = proc() {}
 
 // settings
 background_color: Color
@@ -32,6 +35,9 @@ Color :: struct {
 }
 
 run :: proc() {
+	old_time : time.Time = time.now()
+	current_time: time.Time
+	delta_time: f64
 	context.logger = log.create_console_logger()
 
 	is_running = true
@@ -52,7 +58,7 @@ run :: proc() {
 	}
 
 	init()
-
+	
 	for is_running {
 		event:sdl.Event
 		for sdl.PollEvent(&event) {
@@ -64,7 +70,13 @@ run :: proc() {
 		sdl.SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a)
 		sdl.RenderClear(renderer)
 		
-		tick()
+		current_time = time.now()
+		delta_time = time.duration_milliseconds(time.diff(old_time, current_time))
+		old_time = current_time
+		
+		// TODO update when physics
+		tick(delta_time)
+		
 		sdl.RenderPresent(renderer)
 	}
 
