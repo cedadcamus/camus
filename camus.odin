@@ -18,6 +18,9 @@ TickCallback :: proc(delta_time: f64)
 tick: TickCallback = proc(delta_time: f64) {}
 FixedTickCallback :: proc()
 fixed_tick: FixedTickCallback = proc() {}
+KeyboardEventCallback :: proc(input: sdl.Event)
+keyboard_event: KeyboardEventCallback = proc(input: sdl.Event) {}
+
 
 // settings
 background_color: Color
@@ -62,6 +65,12 @@ run :: proc() {
 	for is_running {
 		event:sdl.Event
 		for sdl.PollEvent(&event) {
+			#partial switch event.type {
+				case sdl.EventType.QUIT:
+					is_running = false
+				case sdl.EventType.KEY_UP, sdl.EventType.KEY_DOWN:
+					keyboard_event(event)
+			}
 			if event.type == sdl.EventType.QUIT {
 				is_running = false
 			}
