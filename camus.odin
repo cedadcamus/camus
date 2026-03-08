@@ -91,3 +91,9 @@ draw_line :: proc(color: Color, start: vector2.Vector2, end: vector2.Vector2) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
 	sdl.RenderLine(renderer, start.x, start.y, end.x, end.y)
 }
+
+
+draw_rect :: proc(color: Color, rect: ^sdl.FRect) {
+	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
+	sdl.RenderRect(renderer, rect)
+}

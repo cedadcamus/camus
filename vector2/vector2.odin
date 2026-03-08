@@ -12,6 +12,11 @@ Vector2Int :: struct {
 	y: i32,
 }
 
+Vector2U8 :: struct {
+	x: u8,
+	y: u8,
+}
+
 
 ZERO : Vector2 : Vector2{0, 0}
 
