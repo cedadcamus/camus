@@ -24,7 +24,7 @@ keyboard_event: KeyboardEventCallback = proc(input: sdl.Event) {}
 
 // settings
 background_color: Color
-window_size: vector2.Vector2Int = vector2.Vector2Int{640, 480}
+window_size := []i32 {640, 480}
 
 // generated variables
 window: ^sdl.Window
@@ -51,7 +51,7 @@ run :: proc() {
 	if !sdl_init {
 		log.panic(sdl.GetError())
 	}
-	window = sdl.CreateWindow("Camus", window_size.x, window_size.y, sdl.WINDOW_OPENGL)
+	window = sdl.CreateWindow("Camus", window_size[0], window_size[1], sdl.WINDOW_OPENGL)
 	if window == nil {
 		log.panic(sdl.GetError())
 	}
@@ -96,13 +96,46 @@ run :: proc() {
 }
 
 
-draw_line :: proc(color: Color, start: vector2.Vector2, end: vector2.Vector2) {
+draw_line :: proc(color: Color, start: [2]f32, end: [2]f32) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
-	sdl.RenderLine(renderer, start.x, start.y, end.x, end.y)
+	sdl.RenderLine(renderer, start[0], start[1], end[0], end[1])
 }
 
 
 draw_rect :: proc(color: Color, rect: ^sdl.FRect) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
 	sdl.RenderRect(renderer, rect)
+}
+
+draw_circle :: proc(color: Color, center: [2]i32, radius: i32) {
+	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
+	
+	x: i32 = radius - 1
+	y: i32 = 0
+	dx: i32 = 1
+	dy: i32 = 1
+	err: i32 = dx - (radius << 1)
+	
+	for x >= y {
+		sdl.RenderPoint(renderer, f32(center[0] + x), f32(center[1] + y))
+        sdl.RenderPoint(renderer, f32(center[0] + y), f32(center[1] + x))
+        sdl.RenderPoint(renderer, f32(center[0] - y), f32(center[1] + x))
+        sdl.RenderPoint(renderer, f32(center[0] - x), f32(center[1] + y))
+        sdl.RenderPoint(renderer, f32(center[0] - x), f32(center[1] - y))
+        sdl.RenderPoint(renderer, f32(center[0] - y), f32(center[1] - x))
+        sdl.RenderPoint(renderer, f32(center[0] + y), f32(center[1] - x))
+        sdl.RenderPoint(renderer, f32(center[0] + x), f32(center[1] - y))
+		
+		if (err <= 0) {
+            y += 1
+            err += dy
+            dy += 2
+        }
+        
+        if (err > 0) {
+            x -= 1
+            dx += 2
+            err += dx - (radius << 1)
+        }
+	}
 }
