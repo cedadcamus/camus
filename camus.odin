@@ -3,7 +3,6 @@ package camus
 import "base:runtime"
 import "core:log"
 import sdl "vendor:sdl3"
-import "vector2"
 import "core:time"
 
 // show
