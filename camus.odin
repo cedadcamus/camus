@@ -4,9 +4,10 @@ import "base:runtime"
 import "core:log"
 import sdl "vendor:sdl3"
 import "core:time"
+import "core:fmt"
 
-// show
 debug := false
+debug_fps := false
 
 is_running := false
 
@@ -23,6 +24,7 @@ keyboard_event: KeyboardEventCallback = proc(input: sdl.Event) {}
 
 // settings
 background_color: Color
+debug_color: Color
 window_size := []i32 {640, 480}
 
 // generated variables
@@ -40,8 +42,11 @@ run :: proc() {
 	old_time : time.Time = time.now()
 	current_time: time.Time
 	delta_time: f64
+	last_fps: i32 = 0
+	fps: i32 = 0
+	fps_accumulator: f64 = 0
 	context.logger = log.create_console_logger()
-
+	
 	is_running = true
 	if debug {
 		log.logf(runtime.Logger_Level.Info, "game started")
@@ -58,7 +63,9 @@ run :: proc() {
 	if renderer == nil {
 		log.panic(sdl.GetError())
 	}
-
+	
+	debug_color.a = 255
+	color_negative(&debug_color, background_color)
 	init()
 	
 	for is_running {
@@ -84,6 +91,18 @@ run :: proc() {
 		
 		// TODO update when physics
 		tick(delta_time)
+		
+		if debug_fps {
+			fps += 1
+			sdl.SetRenderDrawColor(renderer, debug_color.r, debug_color.g, debug_color.b, debug_color.a)
+			sdl.RenderDebugTextFormat(renderer, 16, 16, "%i", last_fps)//(renderer, 16, 16, fmt.ctprintf("%f02", 1 / delta_time))
+			fps_accumulator += delta_time
+			if fps_accumulator > 1000 {
+				fps_accumulator -= 1000
+				last_fps = fps
+				fps = 0
+			}
+		}
 		
 		sdl.RenderPresent(renderer)
 	}
