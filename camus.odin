@@ -3,8 +3,8 @@ package camus
 import "base:runtime"
 import "core:log"
 import sdl "vendor:sdl3"
+import "vendor:sdl3/ttf"
 import "core:time"
-import "core:fmt"
 
 debug := false
 debug_fps := false
@@ -20,6 +20,8 @@ FixedTickCallback :: proc()
 fixed_tick: FixedTickCallback = proc() {}
 KeyboardEventCallback :: proc(input: sdl.Event)
 keyboard_event: KeyboardEventCallback = proc(input: sdl.Event) {}
+DestroyCallback :: proc()
+destroy: DestroyCallback = proc() {}
 
 
 // settings
@@ -53,15 +55,22 @@ run :: proc() {
 	}
 	sdl_init := sdl.Init(sdl.INIT_VIDEO)
 	if !sdl_init {
-		log.panic(sdl.GetError())
+		is_running = false
+		log.log(runtime.Logger_Level.Error, sdl.GetError())
 	}
 	window = sdl.CreateWindow("Camus", window_size[0], window_size[1], sdl.WINDOW_OPENGL)
 	if window == nil {
-		log.panic(sdl.GetError())
+		is_running = false
+		log.log(runtime.Logger_Level.Error, sdl.GetError())
 	}
 	renderer = sdl.CreateRenderer(window, nil)
 	if renderer == nil {
-		log.panic(sdl.GetError())
+		is_running = false
+		log.log(runtime.Logger_Level.Error, sdl.GetError())
+	}
+	if !ttf.Init() {
+		is_running = false
+		log.log(runtime.Logger_Level.Error, sdl.GetError())
 	}
 	
 	debug_color.a = 255
@@ -106,7 +115,10 @@ run :: proc() {
 		
 		sdl.RenderPresent(renderer)
 	}
-
+	
+	destroy()
+	ttf.Quit()
+	sdl.DestroyRenderer(renderer)
 	sdl.DestroyWindow(window)
 	if debug {
 		log.logf(runtime.Logger_Level.Info, "game ended")
