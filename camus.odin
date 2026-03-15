@@ -22,6 +22,8 @@ KeyboardEventCallback :: proc(input: sdl.Event)
 keyboard_event: KeyboardEventCallback = proc(input: sdl.Event) {}
 DestroyCallback :: proc()
 destroy: DestroyCallback = proc() {}
+ReadyCallback :: proc()
+ready: ReadyCallback = proc() {}
 
 
 // settings
@@ -76,6 +78,8 @@ run :: proc() {
 	debug_color.a = 255
 	color_negative(&debug_color, background_color)
 	init()
+	ui_init()
+	ready()
 	
 	for is_running {
 		event:sdl.Event
@@ -100,6 +104,7 @@ run :: proc() {
 		
 		// TODO update when physics
 		tick(delta_time)
+		ui_engine_tick(delta_time)
 		
 		if debug_fps {
 			fps += 1
