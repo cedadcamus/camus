@@ -117,6 +117,7 @@ run :: proc() {
 	}
 	
 	destroy()
+	ui_destroy()
 	ttf.Quit()
 	sdl.DestroyRenderer(renderer)
 	sdl.DestroyWindow(window)
