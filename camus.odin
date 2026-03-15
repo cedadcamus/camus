@@ -27,20 +27,13 @@ ready: ReadyCallback = proc() {}
 
 
 // settings
-background_color: Color
-debug_color: Color
+background_color: sdl.Color
+debug_color: sdl.Color
 window_size := []i32 {640, 480}
 
 // generated variables
 window: ^sdl.Window
 renderer: ^sdl.Renderer
-
-Color :: struct {
-	r: u8,
-	g: u8,
-	b: u8,
-	a: u8,
-}
 
 run :: proc() {
 	old_time : time.Time = time.now()
@@ -76,7 +69,7 @@ run :: proc() {
 	}
 	
 	debug_color.a = 255
-	color_negative(&debug_color, background_color)
+	color_negative_sample(&debug_color, background_color)
 	init()
 	ui_init()
 	ready()
@@ -132,18 +125,23 @@ run :: proc() {
 }
 
 
-draw_line :: proc(color: Color, start: [2]f32, end: [2]f32) {
+draw_line :: proc(color: sdl.Color, start: [2]f32, end: [2]f32) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
 	sdl.RenderLine(renderer, start[0], start[1], end[0], end[1])
 }
 
 
-draw_rect :: proc(color: Color, rect: ^sdl.FRect) {
+draw_rect :: proc(color: sdl.Color, rect: ^sdl.FRect) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
 	sdl.RenderRect(renderer, rect)
 }
 
-draw_circle :: proc(color: Color, center: [2]i32, radius: i32) {
+draw_fill_rect :: proc(color: sdl.Color, rect: ^sdl.FRect) {
+	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
+	sdl.RenderFillRect(renderer, rect)
+}
+
+draw_circle :: proc(color: sdl.Color, center: [2]i32, radius: i32) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
 	
 	x: i32 = radius - 1
