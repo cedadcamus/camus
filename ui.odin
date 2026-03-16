@@ -39,17 +39,25 @@ ui_destroy :: proc() {
 }
 
 ui_mouse_motion_event :: proc(event: sdl.MouseMotionEvent) {
-	#partial switch event.type {
-	case sdl.EventType.MOUSE_MOTION:
-		for text in ui_texts {
+	for text in ui_texts {
+	}
+	for button in ui_buttons {
+		mouse_pos: sdl.FPoint = {event.x, event.y}
+		if !button.hover && sdl.PointInRectFloat(mouse_pos, button.rect) {
+			ui_button_mouse_enter(button)
+		} else if button.hover && !sdl.PointInRectFloat(mouse_pos, button.rect) {
+			ui_button_mouse_exit(button)
 		}
-		for button in ui_buttons {
-			mouse_pos: sdl.FPoint = {event.x, event.y}
-			if !button.hover && sdl.PointInRectFloat(mouse_pos, button.rect) {
-				ui_button_mouse_enter(button)
-			} else if button.hover && !sdl.PointInRectFloat(mouse_pos, button.rect) {
-				ui_button_mouse_exit(button)
-			}
+	}
+}
+
+ui_mouse_button_event :: proc(event: sdl.MouseButtonEvent) {
+	for text in ui_texts {
+	}
+	for button in ui_buttons {
+		mouse_pos: sdl.FPoint = {event.x, event.y}
+		if button.hover {
+			ui_button_mouse_button_event(button, event)
 		}
 	}
 }

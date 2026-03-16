@@ -27,6 +27,8 @@ KeyboardEventCallback :: proc(event: sdl.KeyboardEvent)
 keyboard_event: KeyboardEventCallback = proc(event: sdl.KeyboardEvent) {}
 MouseMotionEventCallback :: proc(event: sdl.MouseMotionEvent)
 mouse_motion_event: MouseMotionEventCallback = proc(event: sdl.MouseMotionEvent) {}
+MouseButtonEventCallback :: proc(event: sdl.MouseButtonEvent)
+mouse_button_event: MouseButtonEventCallback = proc(event: sdl.MouseButtonEvent) {}
 
 
 // settings
@@ -49,7 +51,7 @@ run :: proc() {
 
 	is_running = true
 	if debug {
-		log.logf(runtime.Logger_Level.Info, "game started")
+		log.log(runtime.Logger_Level.Info, "game started")
 	}
 	sdl_init := sdl.Init(sdl.INIT_VIDEO)
 	if !sdl_init {
@@ -85,12 +87,12 @@ run :: proc() {
 				is_running = false
 			case sdl.EventType.KEY_UP, sdl.EventType.KEY_DOWN:
 				keyboard_event(event.key)
-			case sdl.EventType.MOUSE_MOTION,
-			     sdl.EventType.MOUSE_BUTTON_DOWN,
-			     sdl.EventType.MOUSE_BUTTON_UP,
-			     sdl.EventType.MOUSE_WHEEL:
+			case sdl.EventType.MOUSE_MOTION:
 				mouse_motion_event(event.motion)
 				ui_mouse_motion_event(event.motion)
+			case sdl.EventType.MOUSE_BUTTON_DOWN, sdl.EventType.MOUSE_BUTTON_UP:
+				mouse_button_event(event.button)
+				ui_mouse_button_event(event.button)
 			}
 			if event.type == sdl.EventType.QUIT {
 				is_running = false

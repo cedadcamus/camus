@@ -4,6 +4,8 @@ import "base:runtime"
 import "core:log"
 import sdl "vendor:sdl3"
 
+UIButtonClickCallback :: proc(button: ^UIButton)
+
 UIButton :: struct {
 	color:                  sdl.Color,
 	highlight_color:        sdl.FColor,
@@ -11,6 +13,8 @@ UIButton :: struct {
 	hover_color:            sdl.Color,
 	hover_highlight_color:  sdl.FColor,
 	hover_shadow_color:     sdl.FColor,
+	press_color:            sdl.Color,
+	press_hover_color:      sdl.Color,
 	padding:                [4]f32,
 	border_width:           [4]f32,
 	rect:                   sdl.FRect,
@@ -18,6 +22,9 @@ UIButton :: struct {
 	texture:                sdl.Texture,
 	text:                   UIText,
 	hover:                  bool,
+	pressed:                bool,
+	waiting_for_click:      bool,
+	click:                  UIButtonClickCallback,
 
 	// border stuff
 	indices:                [6]i32,
@@ -58,6 +65,9 @@ ui_init_button :: proc(button: ^UIButton) {
 	)
 	color_lighter_sample_f(&button.hover_shadow_color, button.shadow_color, (1.0 / 255.0) * 10.0)
 
+	color_darker_sample(&button.press_color, button.color, 20)
+	color_darker_sample(&button.press_hover_color, button.color, 10)
+
 	button.rect.x = button.text.rect.x - button.padding[0]
 	button.rect.y = button.text.rect.y - button.padding[1]
 	button.rect.w = button.text.rect.w + (button.padding[2] * 2)
@@ -97,136 +107,160 @@ ui_set_button_pos :: proc(button: ^UIButton, x: f32, y: f32) {
 
 ui_button_refresh_border :: proc(button: ^UIButton) {
 	//up
+	if button.pressed {
+		if button.hover {
+			button.up_vertices[0].color = button.hover_shadow_color
+			button.up_vertices[1].color = button.hover_shadow_color
+			button.up_vertices[2].color = button.hover_shadow_color
+			button.up_vertices[3].color = button.hover_shadow_color
+		} else {
+			button.up_vertices[0].color = button.shadow_color
+			button.up_vertices[1].color = button.shadow_color
+			button.up_vertices[2].color = button.shadow_color
+			button.up_vertices[3].color = button.shadow_color
+		}
+	} else {
+		if button.hover {
+			button.up_vertices[0].color = button.hover_highlight_color
+			button.up_vertices[1].color = button.hover_highlight_color
+			button.up_vertices[2].color = button.hover_highlight_color
+			button.up_vertices[3].color = button.hover_highlight_color
+		} else {
+			button.up_vertices[0].color = button.highlight_color
+			button.up_vertices[1].color = button.highlight_color
+			button.up_vertices[2].color = button.highlight_color
+			button.up_vertices[3].color = button.highlight_color
+		}
+	}
+
 	button.up_vertices[0].position[0] = button.rect.x
 	button.up_vertices[0].position[1] = button.rect.y
-	if button.hover {
-		button.up_vertices[0].color = button.highlight_color
-	} else {
-		button.up_vertices[0].color = button.hover_highlight_color
-	}
 
 	button.up_vertices[1].position[0] = button.inner_rect.x
 	button.up_vertices[1].position[1] = button.inner_rect.y
-	if button.hover {
-		button.up_vertices[1].color = button.highlight_color
-	} else {
-		button.up_vertices[1].color = button.hover_highlight_color
-	}
 
 	button.up_vertices[2].position[0] = button.inner_rect.x + button.inner_rect.w
 	button.up_vertices[2].position[1] = button.inner_rect.y
-	if button.hover {
-		button.up_vertices[2].color = button.highlight_color
-	} else {
-		button.up_vertices[2].color = button.hover_highlight_color
-	}
 
 	button.up_vertices[3].position[0] = button.rect.x + button.rect.w
 	button.up_vertices[3].position[1] = button.rect.y
-	if button.hover {
-		button.up_vertices[3].color = button.highlight_color
-	} else {
-		button.up_vertices[3].color = button.hover_highlight_color
-	}
 
 	//left
+	if button.pressed {
+		if button.hover {
+			button.left_vertices[0].color = button.hover_shadow_color
+			button.left_vertices[1].color = button.hover_shadow_color
+			button.left_vertices[2].color = button.hover_shadow_color
+			button.left_vertices[3].color = button.hover_shadow_color
+		} else {
+			button.left_vertices[0].color = button.shadow_color
+			button.left_vertices[1].color = button.shadow_color
+			button.left_vertices[2].color = button.shadow_color
+			button.left_vertices[3].color = button.shadow_color
+		}
+	} else {
+		if button.hover {
+			button.left_vertices[0].color = button.hover_highlight_color
+			button.left_vertices[1].color = button.hover_highlight_color
+			button.left_vertices[2].color = button.hover_highlight_color
+			button.left_vertices[3].color = button.hover_highlight_color
+		} else {
+			button.left_vertices[0].color = button.highlight_color
+			button.left_vertices[1].color = button.highlight_color
+			button.left_vertices[2].color = button.highlight_color
+			button.left_vertices[3].color = button.highlight_color
+		}
+	}
+
 	button.left_vertices[0].position[0] = button.rect.x
 	button.left_vertices[0].position[1] = button.rect.y
-	if button.hover {
-		button.left_vertices[0].color = button.highlight_color
-	} else {
-		button.left_vertices[0].color = button.hover_highlight_color
-	}
 
 	button.left_vertices[1].position[0] = button.rect.x
 	button.left_vertices[1].position[1] = button.rect.y + button.rect.h
-	if button.hover {
-		button.left_vertices[1].color = button.highlight_color
-	} else {
-		button.left_vertices[1].color = button.hover_highlight_color
-	}
 
 	button.left_vertices[2].position[0] = button.inner_rect.x
 	button.left_vertices[2].position[1] = button.inner_rect.y + button.inner_rect.h
-	if button.hover {
-		button.left_vertices[2].color = button.highlight_color
-	} else {
-		button.left_vertices[2].color = button.hover_highlight_color
-	}
 
 	button.left_vertices[3].position[0] = button.inner_rect.x
 	button.left_vertices[3].position[1] = button.inner_rect.y
-	if button.hover {
-		button.left_vertices[3].color = button.highlight_color
-	} else {
-		button.left_vertices[3].color = button.hover_highlight_color
-	}
 
 	//down
+	if button.pressed {
+		if button.hover {
+			button.down_vertices[0].color = button.hover_highlight_color
+			button.down_vertices[1].color = button.hover_highlight_color
+			button.down_vertices[2].color = button.hover_highlight_color
+			button.down_vertices[3].color = button.hover_highlight_color
+		} else {
+			button.down_vertices[0].color = button.highlight_color
+			button.down_vertices[1].color = button.highlight_color
+			button.down_vertices[2].color = button.highlight_color
+			button.down_vertices[3].color = button.highlight_color
+		}
+	} else {
+		if button.hover {
+			button.down_vertices[0].color = button.hover_shadow_color
+			button.down_vertices[1].color = button.hover_shadow_color
+			button.down_vertices[2].color = button.hover_shadow_color
+			button.down_vertices[3].color = button.hover_shadow_color
+		} else {
+			button.down_vertices[0].color = button.shadow_color
+			button.down_vertices[1].color = button.shadow_color
+			button.down_vertices[2].color = button.shadow_color
+			button.down_vertices[3].color = button.shadow_color
+		}
+	}
+
 	button.down_vertices[0].position[0] = button.inner_rect.x
 	button.down_vertices[0].position[1] = button.inner_rect.y + button.inner_rect.h
-	if button.hover {
-		button.down_vertices[0].color = button.shadow_color
-	} else {
-		button.down_vertices[0].color = button.hover_shadow_color
-	}
 
 	button.down_vertices[1].position[0] = button.rect.x
 	button.down_vertices[1].position[1] = button.rect.y + button.rect.h
-	if button.hover {
-		button.down_vertices[1].color = button.shadow_color
-	} else {
-		button.down_vertices[1].color = button.hover_shadow_color
-	}
 
 	button.down_vertices[2].position[0] = button.rect.x + button.rect.w
 	button.down_vertices[2].position[1] = button.rect.y + button.rect.h
-	if button.hover {
-		button.down_vertices[2].color = button.shadow_color
-	} else {
-		button.down_vertices[2].color = button.hover_shadow_color
-	}
 
 	button.down_vertices[3].position[0] = button.inner_rect.x + button.inner_rect.w
 	button.down_vertices[3].position[1] = button.inner_rect.y + button.inner_rect.h
-	if button.hover {
-		button.down_vertices[3].color = button.shadow_color
-	} else {
-		button.down_vertices[3].color = button.hover_shadow_color
-	}
 
 	//right
+	if button.pressed {
+		if button.hover {
+			button.right_vertices[0].color = button.hover_highlight_color
+			button.right_vertices[1].color = button.hover_highlight_color
+			button.right_vertices[2].color = button.hover_highlight_color
+			button.right_vertices[3].color = button.hover_highlight_color
+		} else {
+			button.right_vertices[0].color = button.highlight_color
+			button.right_vertices[1].color = button.highlight_color
+			button.right_vertices[2].color = button.highlight_color
+			button.right_vertices[3].color = button.highlight_color
+		}
+	} else {
+		if button.hover {
+			button.right_vertices[0].color = button.hover_shadow_color
+			button.right_vertices[1].color = button.hover_shadow_color
+			button.right_vertices[2].color = button.hover_shadow_color
+			button.right_vertices[3].color = button.hover_shadow_color
+		} else {
+			button.right_vertices[0].color = button.shadow_color
+			button.right_vertices[1].color = button.shadow_color
+			button.right_vertices[2].color = button.shadow_color
+			button.right_vertices[3].color = button.shadow_color
+		}
+	}
+
 	button.right_vertices[0].position[0] = button.rect.x + button.rect.w
 	button.right_vertices[0].position[1] = button.rect.y
-	if button.hover {
-		button.right_vertices[0].color = button.shadow_color
-	} else {
-		button.right_vertices[0].color = button.hover_shadow_color
-	}
 
 	button.right_vertices[1].position[0] = button.inner_rect.x + button.inner_rect.w
 	button.right_vertices[1].position[1] = button.inner_rect.y
-	if button.hover {
-		button.right_vertices[1].color = button.shadow_color
-	} else {
-		button.right_vertices[1].color = button.hover_shadow_color
-	}
 
 	button.right_vertices[2].position[0] = button.inner_rect.x + button.inner_rect.w
 	button.right_vertices[2].position[1] = button.inner_rect.y + button.inner_rect.h
-	if button.hover {
-		button.right_vertices[2].color = button.shadow_color
-	} else {
-		button.right_vertices[2].color = button.hover_shadow_color
-	}
 
 	button.right_vertices[3].position[0] = button.rect.x + button.rect.w
 	button.right_vertices[3].position[1] = button.rect.y + button.rect.h
-	if button.hover {
-		button.right_vertices[3].color = button.shadow_color
-	} else {
-		button.right_vertices[3].color = button.hover_shadow_color
-	}
 }
 
 ui_button_render :: proc(button: ^UIButton) {
@@ -236,20 +270,51 @@ ui_button_render :: proc(button: ^UIButton) {
 	sdl.RenderGeometry(renderer, nil, button.down_vertices_pointer, 4, button.indices_pointer, 6)
 	sdl.RenderGeometry(renderer, nil, button.right_vertices_pointer, 4, button.indices_pointer, 6)
 
-	if button.hover {
-		draw_fill_rect(button.hover_color, &button.inner_rect)
+	if button.pressed {
+		if button.hover {
+			draw_fill_rect(button.press_hover_color, &button.inner_rect)
+		} else {
+			draw_fill_rect(button.press_color, &button.inner_rect)
+		}
 	} else {
-		draw_fill_rect(button.color, &button.inner_rect)
+		if button.hover {
+			draw_fill_rect(button.hover_color, &button.inner_rect)
+		} else {
+			draw_fill_rect(button.color, &button.inner_rect)
+		}
+
 	}
+
 	sdl.RenderTexture(renderer, button.text.texture, nil, &button.text.rect)
 }
 
 ui_button_mouse_enter :: proc(button: ^UIButton) {
 	button.hover = true
+	button.waiting_for_click = false
+	button.pressed = false
 	ui_button_refresh_border(button)
 }
 
 ui_button_mouse_exit :: proc(button: ^UIButton) {
 	button.hover = false
+	button.waiting_for_click = false
+	button.pressed = false
 	ui_button_refresh_border(button)
+}
+
+ui_button_mouse_button_event :: proc(button: ^UIButton, event: sdl.MouseButtonEvent) {
+	if event.button == 1 {
+		button.pressed = event.down
+		if event.down {
+			button.waiting_for_click = true
+		} else {
+			if button.waiting_for_click {
+				if button.click != nil {
+					button.click(button)
+				}
+			}
+			button.waiting_for_click = false
+		}
+		ui_button_refresh_border(button)
+	}
 }

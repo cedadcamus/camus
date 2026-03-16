@@ -69,6 +69,16 @@ color_darker_sample :: proc(color: ^sdl.Color, sample: sdl.Color, amount: u8 = 2
 	color.b = sample.b - amount
 }
 
+color_darker_sample_f :: proc(
+	color: ^sdl.FColor,
+	sample: sdl.FColor,
+	amount: f32 = (1.0 / 255.0) * 25.0,
+) {
+	color.r = sample.r - amount
+	color.g = sample.g - amount
+	color.b = sample.b - amount
+}
+
 color_darker_sample_tof :: proc(color: ^sdl.FColor, sample: sdl.Color, amount: u8 = 25) {
 	color.r = f32(sample.r - amount) / 255
 	color.g = f32(sample.g - amount) / 255
