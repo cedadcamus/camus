@@ -39,6 +39,7 @@ window_size := []i32{640, 480}
 // generated variables
 window: ^sdl.Window
 renderer: ^sdl.Renderer
+current_scene: ^Scene
 
 run :: proc() {
 	old_time: time.Time = time.now()
@@ -76,7 +77,7 @@ run :: proc() {
 	debug_color.a = 255
 	color_negative_sample(&debug_color, background_color)
 	init()
-	ui_init()
+	ui_init(current_scene)
 	ready()
 
 	for is_running {
@@ -89,10 +90,10 @@ run :: proc() {
 				keyboard_event(event.key)
 			case sdl.EventType.MOUSE_MOTION:
 				mouse_motion_event(event.motion)
-				ui_mouse_motion_event(event.motion)
+				ui_mouse_motion_event(event.motion, current_scene)
 			case sdl.EventType.MOUSE_BUTTON_DOWN, sdl.EventType.MOUSE_BUTTON_UP:
 				mouse_button_event(event.button)
-				ui_mouse_button_event(event.button)
+				ui_mouse_button_event(event.button, current_scene)
 			}
 			if event.type == sdl.EventType.QUIT {
 				is_running = false
@@ -114,7 +115,7 @@ run :: proc() {
 
 		// TODO update when physics
 		tick(delta_time)
-		ui_engine_tick(delta_time)
+		ui_engine_tick(delta_time, current_scene)
 
 		if debug_fps {
 			fps += 1
@@ -138,7 +139,7 @@ run :: proc() {
 	}
 
 	destroy()
-	ui_destroy()
+	ui_destroy(current_scene)
 	ttf.Quit()
 	sdl.DestroyRenderer(renderer)
 	sdl.DestroyWindow(window)

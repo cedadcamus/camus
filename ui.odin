@@ -5,26 +5,26 @@ import "core:log"
 import sdl "vendor:sdl3"
 import "vendor:sdl3/ttf"
 
-ui_init :: proc() {
-	for text in ui_texts {
+ui_init :: proc(scene: ^Scene) {
+	for text in scene.ui_texts {
 		ui_init_text(text)
 	}
-	for button in ui_buttons {
+	for button in scene.ui_buttons {
 		ui_init_button(button)
 	}
 }
 
-ui_engine_tick :: proc(delta_time: f64) {
-	for text in ui_texts {
+ui_engine_tick :: proc(delta_time: f64, scene: ^Scene) {
+	for text in scene.ui_texts {
 		ui_render_text(text)
 	}
-	for button in ui_buttons {
+	for button in scene.ui_buttons {
 		ui_button_render(button)
 	}
 }
 
-ui_destroy :: proc() {
-	for text in ui_texts {
+ui_destroy :: proc(scene: ^Scene) {
+	for text in scene.ui_texts {
 		sdl.DestroyTexture(text.texture)
 	}
 	for name in ui_fonts {
@@ -38,10 +38,10 @@ ui_destroy :: proc() {
 	clear_map(&ui_fonts)
 }
 
-ui_mouse_motion_event :: proc(event: sdl.MouseMotionEvent) {
-	for text in ui_texts {
+ui_mouse_motion_event :: proc(event: sdl.MouseMotionEvent, scene: ^Scene) {
+	for text in scene.ui_texts {
 	}
-	for button in ui_buttons {
+	for button in scene.ui_buttons {
 		mouse_pos: sdl.FPoint = {event.x, event.y}
 		if !button.hover && sdl.PointInRectFloat(mouse_pos, button.rect) {
 			ui_button_mouse_enter(button)
@@ -51,10 +51,10 @@ ui_mouse_motion_event :: proc(event: sdl.MouseMotionEvent) {
 	}
 }
 
-ui_mouse_button_event :: proc(event: sdl.MouseButtonEvent) {
-	for text in ui_texts {
+ui_mouse_button_event :: proc(event: sdl.MouseButtonEvent, scene: ^Scene) {
+	for text in scene.ui_texts {
 	}
-	for button in ui_buttons {
+	for button in scene.ui_buttons {
 		mouse_pos: sdl.FPoint = {event.x, event.y}
 		if button.hover {
 			ui_button_mouse_button_event(button, event)

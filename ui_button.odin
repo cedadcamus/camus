@@ -43,11 +43,9 @@ UIButton :: struct {
 	mouse_leave:            MouseMotionEventCallback,
 }
 
-ui_buttons: [dynamic]^UIButton
-
-ui_create_button :: proc() -> ^UIButton {
+ui_create_button :: proc(scene: ^Scene) -> ^UIButton {
 	button := new(UIButton)
-	append(&ui_buttons, button)
+	append(&scene.ui_buttons, button)
 	return button
 }
 

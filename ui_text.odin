@@ -13,11 +13,9 @@ UIText :: struct {
 	font_size: f32,
 }
 
-ui_texts: [dynamic]^UIText
-
-ui_create_text :: proc() -> ^UIText {
+ui_create_text :: proc(scene: ^Scene) -> ^UIText {
 	text := new(UIText)
-	append(&ui_texts, text)
+	append(&scene.ui_texts, text)
 	return text
 }
 
