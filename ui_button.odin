@@ -283,7 +283,8 @@ ui_button_render :: proc(button: ^UIButton) {
 
 	}
 
-	sdl.RenderTexture(renderer, button.text.texture, nil, &button.text.rect)
+	ui_render_text(&button.text)
+
 }
 
 ui_button_mouse_enter :: proc(button: ^UIButton) {
