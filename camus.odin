@@ -29,12 +29,13 @@ MouseMotionEventCallback :: proc(event: sdl.MouseMotionEvent)
 mouse_motion_event: MouseMotionEventCallback = proc(event: sdl.MouseMotionEvent) {}
 MouseButtonEventCallback :: proc(event: sdl.MouseButtonEvent)
 mouse_button_event: MouseButtonEventCallback = proc(event: sdl.MouseButtonEvent) {}
+WindowSizeEventCallback :: proc(event: sdl.WindowEvent)
+window_size_event: WindowSizeEventCallback = proc(event: sdl.WindowEvent) {}
 
 
 // settings
 background_color: sdl.Color
 debug_color: sdl.Color
-window_size := []i32{640, 480}
 
 // generated variables
 window: ^sdl.Window
@@ -94,9 +95,11 @@ run :: proc() {
 			case sdl.EventType.MOUSE_BUTTON_DOWN, sdl.EventType.MOUSE_BUTTON_UP:
 				mouse_button_event(event.button)
 				ui_mouse_button_event(event.button, current_scene)
-			}
-			if event.type == sdl.EventType.QUIT {
-				is_running = false
+			case sdl.EventType.WINDOW_RESIZED,
+			     sdl.EventType.WINDOW_MAXIMIZED,
+			     sdl.EventType.WINDOW_RESTORED:
+				window_size_changed()
+				window_size_event(event.window)
 			}
 		}
 
@@ -149,9 +152,17 @@ run :: proc() {
 }
 
 
-draw_line :: proc(color: sdl.Color, start: [2]f32, end: [2]f32) {
+set_color :: proc(color: sdl.Color) {
 	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
-	sdl.RenderLine(renderer, start[0], start[1], end[0], end[1])
+}
+
+draw_line :: proc(start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
+	sdl.RenderLine(renderer, start_x, start_y, end_x, end_y)
+}
+
+draw_line_color :: proc(color: sdl.Color, start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
+	set_color(color)
+	draw_line(start_x, start_y, end_x, end_y)
 }
 
 
@@ -165,9 +176,7 @@ draw_fill_rect :: proc(color: sdl.Color, rect: ^sdl.FRect) {
 	sdl.RenderFillRect(renderer, rect)
 }
 
-draw_circle :: proc(color: sdl.Color, center: [2]i32, radius: i32) {
-	sdl.SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a)
-
+draw_circle :: proc(center_x: i32, center_y: i32, radius: i32) {
 	x: i32 = radius - 1
 	y: i32 = 0
 	dx: i32 = 1
@@ -175,14 +184,14 @@ draw_circle :: proc(color: sdl.Color, center: [2]i32, radius: i32) {
 	err: i32 = dx - (radius << 1)
 
 	for x >= y {
-		sdl.RenderPoint(renderer, f32(center[0] + x), f32(center[1] + y))
-		sdl.RenderPoint(renderer, f32(center[0] + y), f32(center[1] + x))
-		sdl.RenderPoint(renderer, f32(center[0] - y), f32(center[1] + x))
-		sdl.RenderPoint(renderer, f32(center[0] - x), f32(center[1] + y))
-		sdl.RenderPoint(renderer, f32(center[0] - x), f32(center[1] - y))
-		sdl.RenderPoint(renderer, f32(center[0] - y), f32(center[1] - x))
-		sdl.RenderPoint(renderer, f32(center[0] + y), f32(center[1] - x))
-		sdl.RenderPoint(renderer, f32(center[0] + x), f32(center[1] - y))
+		sdl.RenderPoint(renderer, f32(center_x + x), f32(center_y + y))
+		sdl.RenderPoint(renderer, f32(center_x + y), f32(center_y + x))
+		sdl.RenderPoint(renderer, f32(center_x - y), f32(center_y + x))
+		sdl.RenderPoint(renderer, f32(center_x - x), f32(center_y + y))
+		sdl.RenderPoint(renderer, f32(center_x - x), f32(center_y - y))
+		sdl.RenderPoint(renderer, f32(center_x - y), f32(center_y - x))
+		sdl.RenderPoint(renderer, f32(center_x + y), f32(center_y - x))
+		sdl.RenderPoint(renderer, f32(center_x + x), f32(center_y - y))
 
 		if (err <= 0) {
 			y += 1
@@ -196,4 +205,9 @@ draw_circle :: proc(color: sdl.Color, center: [2]i32, radius: i32) {
 			err += dx - (radius << 1)
 		}
 	}
+}
+
+draw_circle_color :: proc(color: sdl.Color, center_x: i32, center_y: i32, radius: i32) {
+	set_color(color)
+	draw_circle(center_x, center_y, radius)
 }
