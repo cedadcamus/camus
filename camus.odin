@@ -90,8 +90,8 @@ run :: proc() {
 			case sdl.EventType.KEY_UP, sdl.EventType.KEY_DOWN:
 				keyboard_event(event.key)
 			case sdl.EventType.MOUSE_MOTION:
-				mouse_motion_event(event.motion)
 				ui_mouse_motion_event(event.motion, current_scene)
+				mouse_motion_event(event.motion)
 			case sdl.EventType.MOUSE_BUTTON_DOWN, sdl.EventType.MOUSE_BUTTON_UP:
 				mouse_button_event(event.button)
 				ui_mouse_button_event(event.button, current_scene)
@@ -129,7 +129,7 @@ run :: proc() {
 				debug_color.b,
 				debug_color.a,
 			)
-			sdl.RenderDebugTextFormat(renderer, 16, 16, "%i", last_fps) //(renderer, 16, 16, fmt.ctprintf("%f02", 1 / delta_time))
+			sdl.RenderDebugTextFormat(renderer, 16, 16, "%i", last_fps)
 			fps_accumulator += delta_time
 			if fps_accumulator > 1000 {
 				fps_accumulator -= 1000
