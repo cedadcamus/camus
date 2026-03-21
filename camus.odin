@@ -75,6 +75,8 @@ run :: proc() {
 		log.log(runtime.Logger_Level.Error, sdl.GetError())
 	}
 
+	sdl.SetRenderDrawBlendMode(renderer, sdl.BLENDMODE_BLEND)
+
 	debug_color.a = 255
 	color_negative_sample(&debug_color, background_color)
 	init()
@@ -143,6 +145,7 @@ run :: proc() {
 
 	destroy()
 	ui_destroy(current_scene)
+	internal_ui_destroy()
 	ttf.Quit()
 	sdl.DestroyRenderer(renderer)
 	sdl.DestroyWindow(window)

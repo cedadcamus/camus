@@ -20,6 +20,7 @@ color_negative_sample :: proc(color: ^sdl.Color, sample: sdl.Color) {
 	color.r = u8(abs(r))
 	color.g = u8(abs(g))
 	color.b = u8(abs(b))
+	color.a = u8(sample.a)
 }
 
 color_negative_sample_tof :: proc(color: ^sdl.FColor, sample: sdl.Color) {
@@ -40,6 +41,7 @@ color_lighter_sample :: proc(color: ^sdl.Color, sample: sdl.Color, amount: u8 = 
 	color.r = sample.r + amount
 	color.g = sample.g + amount
 	color.b = sample.b + amount
+	color.a = sample.a
 }
 
 color_lighter_sample_f :: proc(
@@ -50,6 +52,7 @@ color_lighter_sample_f :: proc(
 	color.r = sample.r + amount
 	color.g = sample.g + amount
 	color.b = sample.b + amount
+	color.a = sample.a
 }
 
 color_lighter_sample_tof :: proc(color: ^sdl.FColor, sample: sdl.Color, amount: u8 = 25) {
@@ -67,6 +70,7 @@ color_darker_sample :: proc(color: ^sdl.Color, sample: sdl.Color, amount: u8 = 2
 	color.r = sample.r - amount
 	color.g = sample.g - amount
 	color.b = sample.b - amount
+	color.a = sample.a
 }
 
 color_darker_sample_f :: proc(
@@ -77,6 +81,7 @@ color_darker_sample_f :: proc(
 	color.r = sample.r - amount
 	color.g = sample.g - amount
 	color.b = sample.b - amount
+	color.a = sample.a
 }
 
 color_darker_sample_tof :: proc(color: ^sdl.FColor, sample: sdl.Color, amount: u8 = 25) {

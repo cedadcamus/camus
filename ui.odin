@@ -27,6 +27,9 @@ ui_destroy :: proc(scene: ^Scene) {
 	for text in scene.ui_texts {
 		sdl.DestroyTexture(text.texture)
 	}
+}
+
+internal_ui_destroy :: proc() {
 	for name in ui_fonts {
 		font := ui_fonts[name]
 		for size in font.sizes {
@@ -37,6 +40,7 @@ ui_destroy :: proc(scene: ^Scene) {
 	}
 	clear_map(&ui_fonts)
 }
+
 
 ui_mouse_motion_event :: proc(event: sdl.MouseMotionEvent, scene: ^Scene) {
 	for text in scene.ui_texts {
