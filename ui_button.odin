@@ -25,6 +25,7 @@ UIButton :: struct {
 	pressed:                bool,
 	waiting_for_click:      bool,
 	click:                  UIButtonClickCallback,
+	visible:                bool,
 
 	// border stuff
 	indices:                [6]i32,
@@ -66,15 +67,27 @@ ui_init_button :: proc(button: ^UIButton) {
 	color_darker_sample(&button.press_color, button.color, 20)
 	color_darker_sample(&button.press_hover_color, button.color, 10)
 
-	button.rect.x = button.text.rect.x - button.padding[0]
-	button.rect.y = button.text.rect.y - button.padding[1]
-	button.rect.w = button.text.rect.w + (button.padding[2] * 2)
-	button.rect.h = button.text.rect.h + (button.padding[3] * 2)
-	button.inner_rect = button.rect
-	button.rect.x -= button.border_width[0]
-	button.rect.y -= button.border_width[1]
-	button.rect.w += button.border_width[2] * 2
-	button.rect.h += button.border_width[3] * 2
+	button.rect.x = 0
+	button.rect.y = 0
+	button.text.rect.x = button.border_width[0] + button.padding[0]
+	button.text.rect.y = button.border_width[1] + button.padding[1]
+	button.inner_rect.x = button.border_width[0]
+	button.inner_rect.y = button.border_width[1]
+	button.inner_rect.w = button.text.rect.w + button.padding[0] + button.padding[2]
+	button.inner_rect.h = button.text.rect.h + button.padding[1] + button.padding[3]
+	button.rect.w = button.border_width[0] + button.border_width[2] + button.inner_rect.w
+	button.rect.h = button.border_width[1] + button.border_width[3] + button.inner_rect.h
+
+
+	// button.rect.x = button.text.rect.x - button.padding[0]
+	// button.rect.y = button.text.rect.y - button.padding[1]
+	// button.rect.w = button.text.rect.w + (button.padding[2] * 2)
+	// button.rect.h = button.text.rect.h + (button.padding[3] * 2)
+	// button.inner_rect = button.rect
+	// button.rect.x -= button.border_width[0]
+	// button.rect.y -= button.border_width[1]
+	// button.rect.w += button.border_width[2] * 2
+	// button.rect.h += button.border_width[3] * 2
 
 	ui_button_refresh_border(button)
 
@@ -93,12 +106,20 @@ ui_init_button :: proc(button: ^UIButton) {
 }
 
 ui_set_button_pos :: proc(button: ^UIButton, x: f32, y: f32) {
-	button.rect.x = x - button.border_width[0]
-	button.rect.y = y - button.border_width[1]
-	button.inner_rect.x = x
-	button.inner_rect.y = y
-	button.text.rect.x = x + button.padding[0]
-	button.text.rect.y = y + button.padding[1]
+	button.rect.x = x
+	button.rect.y = y
+	button.inner_rect.x = button.rect.x + button.border_width[0]
+	button.inner_rect.y = button.rect.y + button.border_width[1]
+	button.text.rect.x = button.inner_rect.x + button.padding[0]
+	button.text.rect.y = button.inner_rect.y + button.padding[1]
+
+
+	// button.rect.x = x - button.border_width[0]
+	// button.rect.y = y - button.border_width[1]
+	// button.inner_rect.x = x
+	// button.inner_rect.y = y
+	// button.text.rect.x = x + button.padding[0]
+	// button.text.rect.y = y + button.padding[1]
 
 	ui_button_refresh_border(button)
 }

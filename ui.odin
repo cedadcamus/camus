@@ -16,10 +16,14 @@ ui_init :: proc(scene: ^Scene) {
 
 ui_engine_tick :: proc(delta_time: f64, scene: ^Scene) {
 	for text in scene.ui_texts {
-		ui_render_text(text)
+		if text.visible {
+			ui_render_text(text)
+		}
 	}
 	for button in scene.ui_buttons {
-		ui_button_render(button)
+		if button.visible {
+			ui_button_render(button)
+		}
 	}
 }
 

@@ -11,6 +11,7 @@ UIText :: struct {
 	font:      ^ttf.Font,
 	font_name: string,
 	font_size: f32,
+	visible:   bool,
 }
 
 ui_create_text :: proc(scene: ^Scene) -> ^UIText {
