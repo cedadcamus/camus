@@ -1,6 +1,7 @@
 package camus
 
 import "base:runtime"
+import "core:bufio"
 import "core:log"
 import sdl "vendor:sdl3"
 import "vendor:sdl3/ttf"
@@ -30,6 +31,9 @@ ui_engine_tick :: proc(delta_time: f64, scene: ^Scene) {
 ui_destroy :: proc(scene: ^Scene) {
 	for text in scene.ui_texts {
 		sdl.DestroyTexture(text.texture)
+	}
+	for button in scene.ui_buttons {
+		sdl.DestroyTexture(button.text.texture)
 	}
 }
 
