@@ -19,7 +19,6 @@ UIButton :: struct {
 	border_width:           [4]f32,
 	rect:                   sdl.FRect,
 	inner_rect:             sdl.FRect,
-	texture:                sdl.Texture,
 	text:                   UIText,
 	hover:                  bool,
 	pressed:                bool,
@@ -78,17 +77,6 @@ ui_init_button :: proc(button: ^UIButton) {
 	button.rect.w = button.border_width[0] + button.border_width[2] + button.inner_rect.w
 	button.rect.h = button.border_width[1] + button.border_width[3] + button.inner_rect.h
 
-
-	// button.rect.x = button.text.rect.x - button.padding[0]
-	// button.rect.y = button.text.rect.y - button.padding[1]
-	// button.rect.w = button.text.rect.w + (button.padding[2] * 2)
-	// button.rect.h = button.text.rect.h + (button.padding[3] * 2)
-	// button.inner_rect = button.rect
-	// button.rect.x -= button.border_width[0]
-	// button.rect.y -= button.border_width[1]
-	// button.rect.w += button.border_width[2] * 2
-	// button.rect.h += button.border_width[3] * 2
-
 	ui_button_refresh_border(button)
 
 	button.indices[0] = 0
@@ -112,14 +100,6 @@ ui_set_button_pos :: proc(button: ^UIButton, x: f32, y: f32) {
 	button.inner_rect.y = button.rect.y + button.border_width[1]
 	button.text.rect.x = button.inner_rect.x + button.padding[0]
 	button.text.rect.y = button.inner_rect.y + button.padding[1]
-
-
-	// button.rect.x = x - button.border_width[0]
-	// button.rect.y = y - button.border_width[1]
-	// button.inner_rect.x = x
-	// button.inner_rect.y = y
-	// button.text.rect.x = x + button.padding[0]
-	// button.text.rect.y = y + button.padding[1]
 
 	ui_button_refresh_border(button)
 }
@@ -309,6 +289,9 @@ ui_button_render :: proc(button: ^UIButton) {
 }
 
 ui_button_mouse_enter :: proc(button: ^UIButton) {
+	if !button.visible {
+		return
+	}
 	button.hover = true
 	button.waiting_for_click = false
 	button.pressed = false
@@ -316,6 +299,9 @@ ui_button_mouse_enter :: proc(button: ^UIButton) {
 }
 
 ui_button_mouse_exit :: proc(button: ^UIButton) {
+	if !button.visible {
+		return
+	}
 	button.hover = false
 	button.waiting_for_click = false
 	button.pressed = false
@@ -323,6 +309,9 @@ ui_button_mouse_exit :: proc(button: ^UIButton) {
 }
 
 ui_button_mouse_button_event :: proc(button: ^UIButton, event: sdl.MouseButtonEvent) {
+	if !button.visible {
+		return
+	}
 	if event.button == 1 {
 		button.pressed = event.down
 		if event.down {
@@ -337,4 +326,11 @@ ui_button_mouse_button_event :: proc(button: ^UIButton, event: sdl.MouseButtonEv
 		}
 		ui_button_refresh_border(button)
 	}
+}
+
+ui_button_hide :: proc(button: ^UIButton) {
+	button.visible = false
+	button.hover = false
+	button.waiting_for_click = false
+	button.pressed = false
 }

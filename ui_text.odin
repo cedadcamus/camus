@@ -33,6 +33,17 @@ ui_init_text :: proc(text: ^UIText) {
 	sdl.GetTextureSize(text.texture, &text.rect.w, &text.rect.h)
 }
 
+ui_set_text_color :: proc(text: ^UIText, r: u8, g: u8, b: u8, a: u8) {
+	text.color.r = r
+	text.color.g = g
+	text.color.b = b
+	text.color.a = a
+	sdl.DestroyTexture(text.texture)
+	surface := ttf.RenderText_Blended(text.font, text.text, 0, text.color)
+	text.texture = sdl.CreateTextureFromSurface(renderer, surface)
+	sdl.DestroySurface(surface)
+}
+
 ui_set_text_pos :: proc(text: ^UIText, x: f32, y: f32) {
 	text.rect.x = x
 	text.rect.y = y
