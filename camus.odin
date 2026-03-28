@@ -53,7 +53,7 @@ run :: proc() {
 
 	is_running = true
 	if debug {
-		log.log(runtime.Logger_Level.Info, "game started")
+		log.log(runtime.Logger_Level.Info, "starting game...")
 	}
 	sdl_init := sdl.Init(sdl.INIT_VIDEO)
 	if !sdl_init {
@@ -80,7 +80,15 @@ run :: proc() {
 	debug_color.a = 255
 	color_negative_sample(&debug_color, background_color)
 	init()
-	ui_init(current_scene)
+
+	if current_scene != nil {
+		ui_init(current_scene)
+	} else {
+		log.log(runtime.Logger_Level.Error, "No scene available, quitting. ")
+		quit_application()
+		return
+	}
+
 	ready()
 
 	for is_running {
@@ -143,6 +151,10 @@ run :: proc() {
 		sdl.RenderPresent(renderer)
 	}
 
+	quit_application()
+}
+
+quit_application :: proc() {
 	destroy()
 	ui_destroy(current_scene)
 	internal_ui_destroy()
